@@ -3,23 +3,47 @@ var context = canvas.getContext("2d");
 $('body').css('background-image', 'url(assets/img/grass.png)');
 
 ///Обьекты
-let herosprite = new Image();
-herosprite.src = "assets/img/herosprite.png";
-herosprite.onload = function() {
-	drawhero();
+
+//загрузка спрайтов персонажа
+function loadImage() {
+  herosprite.src = 'assets/img/herosprite.png';
+  herosprite.onload = function() {
+    window.requestAnimationFrame(drawhero);
+  };
 };
+//
+
 ///
 
 ///константы
-const scale = 2;
-const width = 16;
-const height = 18;
-const scaledWidth = scale * width;
-const scaledHeight = scale * height;
-const cycleLoop = [0, 1, 0, 2];
+const SCALE = 2;
+const WIDTH = 16;
+const HEIGHT = 18;
+const SCALED_WIDTH = SCALE * WIDTH;
+const SCALED_HEIGHT = SCALE * HEIGHT;
+const CYCLE_LOOP = [0, 1, 0, 2];
+const FACING_DOWN = 0;
+const FACING_UP = 1;
+const FACING_LEFT = 2;
+const FACING_RIGHT = 3;
+const FRAME_LIMIT = 12;
+const MOVEMENT_SPEED = 0.002;
+const cell = {
+	width: 64,
+	height: 64
+};
+let keyPresses = {};
+let currentDirection = FACING_DOWN;
 let currentLoopIndex = 0;
 let frameCount = 0;
-let currentDirection = 0;
+let positionX = 0;
+let positionY = 0;
+let herosprite = new Image();
+let map = [];
+const map_data = {
+	count_w:0,
+	count_h:0
+}
 ///
 
 ///функция отрисовки карты
@@ -37,17 +61,6 @@ function Pfield(){
 		}
 	}
 }
-
-const cell = {
-	width: 64,
-	height: 64
-};
-
-let map = [];
-const map_data = {
-	count_w:0,
-	count_h:0
-}
 ///
 
 ///функция отрисовки игры
@@ -62,45 +75,76 @@ function Game(){
 			cell.height
 			)
 			drawhero(herosprite);
-	        requestAnimationFrame(step);
+	        requestAnimationFrame(drawhero);	
 	}
 }
 ///
 
 ///анимиция персонажа
+
+//функция для упрощения метода drawimage
 function drawFrame(frameX, frameY, canvasX, canvasY) {
-	context.drawImage(herosprite,
-		frameX * width, frameY * height, width, height,
-		canvasX, canvasY, scaledWidth, scaledHeight);
+  context.drawImage(herosprite,
+                frameX * WIDTH, frameY * HEIGHT, WIDTH, HEIGHT,
+                canvasX, canvasY, SCALED_WIDTH, SCALED_HEIGHT);
 }
-//Отрисовка персонажа со спрайтов с помощью drawimage
+//
+
+loadImage();
+
+//получение пользовательского ввода
+window.addEventListener('keydown', keyDownListener, false);
+function keyDownListener(event) {
+  keyPresses[event.key] = true;
+}
+window.addEventListener('keyup', keyUpListener, false);
+function keyUpListener(event) {
+  keyPresses[event.key] = false;
+}
+//
+
+//функция перемещение персонажа с отрисовкой нужного спрайта
 function drawhero() {
-	drawFrame(0, 0, 0, 0);
-	drawFrame(1, 0, scaledWidth, 0);
-	drawFrame(0, 0, scaledWidth * 2, 0);
-	drawFrame(2, 0, scaledWidth * 3, 0);
-	window.requestAnimationFrame(step);
+	 context.clearRect(0, 0, canvas.width, canvas.height);
+  let hasMoved = false;
+  if (keyPresses.w) {
+    moveCharacter(0, -MOVEMENT_SPEED, FACING_UP);
+    hasMoved = true;
+  } else if (keyPresses.s) {
+    moveCharacter(0, MOVEMENT_SPEED, FACING_DOWN);
+    hasMoved = true;
+  }
+  if (keyPresses.a) {
+    moveCharacter(-MOVEMENT_SPEED, 0, FACING_LEFT);
+    hasMoved = true;
+  } else if (keyPresses.d) {
+    moveCharacter(MOVEMENT_SPEED, 0, FACING_RIGHT);
+    hasMoved = true;
+  }
+  if (hasMoved) {
+    frameCount++;
+    if (frameCount >= FRAME_LIMIT) {
+      frameCount = 0;
+      currentLoopIndex++;
+      if (currentLoopIndex >= CYCLE_LOOP.length) {
+        currentLoopIndex = 0;
+      }
+    }
+  }
+  if (!hasMoved) {
+    currentLoopIndex = 0;
+  }
+  drawFrame(CYCLE_LOOP[currentLoopIndex], currentDirection, positionX, positionY);
+  window.requestAnimationFrame(drawhero);
+}
+//функция на границы карты
+ function moveCharacter(deltaX, deltaY, direction) {
+  if (positionX + deltaX > 0 && positionX + SCALED_WIDTH + deltaX < canvas.width) {
+    positionX += deltaX;
+  }
+  if (positionY + deltaY > 0 && positionY + SCALED_HEIGHT + deltaY < canvas.height) {
+    positionY += deltaY;
+  }
+  currentDirection = direction;
 }
 //
-//функция отрисовки спрайтов
-function step() {
-	frameCount++;
-	if (frameCount < 15) {
-		window.requestAnimationFrame(step);
-		return;
-	}
-	frameCount = 0;
-	context.clearRect(0, 0, canvas.width, canvas.height);
-	drawFrame(cycleLoop[currentLoopIndex], currentDirection, 0, 0);
-	currentLoopIndex++;
-	if (currentLoopIndex >= cycleLoop.length) {
-		currentLoopIndex = 0;
-		currentDirection++;
-	}
-	if (currentDirection >= 4) {
-		currentDirection = 0;
-	}
-	window.requestAnimationFrame(step);
-}
-//
-///
