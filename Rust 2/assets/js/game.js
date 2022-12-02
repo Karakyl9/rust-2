@@ -3,15 +3,20 @@ var context = canvas.getContext("2d");
 $('body').css('background-image', 'url(assets/img/grass.png)');
 
 ///Обьекты
+let tree = new Image();
+tree.src = "assets/img/tree.png"
+let stone = new Image();
+stone.src = "assets/img/stone.png"
+///
 
-//загрузка спрайтов персонажа
+///загрузка спрайтов персонажа
 function loadImage() {
   herosprite.src = 'assets/img/herosprite.png';
   herosprite.onload = function() {
     window.requestAnimationFrame(drawhero);
   };
 };
-//
+///
 
 ///
 
@@ -75,7 +80,8 @@ function Game(){
 			cell.height
 			)
 			drawhero(herosprite);
-	        requestAnimationFrame(drawhero);	
+	        requestAnimationFrame(drawhero);
+	        spawnObject();	
 	}
 }
 ///
@@ -148,3 +154,11 @@ function drawhero() {
   currentDirection = direction;
 }
 //
+
+///спавн игровых обьектов
+function spawnObject(){
+	
+}
+///таймер
+
+///
