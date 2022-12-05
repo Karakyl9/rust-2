@@ -3,10 +3,34 @@ var context = canvas.getContext("2d");
 $('body').css('background-image', 'url(assets/img/grass.png)');
 
 ///Обьекты
-let tree = new Image();
-tree.src = "assets/img/tree.png"
-let stone = new Image();
-stone.src = "assets/img/stone.png"
+
+///
+///Функция на спавн деревьев
+function loadImage_tree(){
+  let tree = new Image();
+  tree.src = "assets/img/tree.png"
+  tree.onload = function(){
+    for(var i = 0; i < 5; i++){
+      let x = Math.floor(Math.random() * canvas.width);
+      let y = Math.floor(Math.random() * canvas.height);
+      context.drawImage(tree, x, y);
+    }
+  }
+}
+///
+
+///Функция на спавн камней
+function loadImage_stone(){
+  let stone = new Image();
+  stone.src = "assets/img/stone.png"
+  stone.onload = function(){
+    for(var i = 0; i < 5; i++){
+      let x = Math.floor(Math.random() * canvas.width);
+      let y = Math.floor(Math.random() * canvas.height);
+      context.drawImage(stone, x, y);
+    }
+  }
+}
 ///
 
 ///загрузка спрайтов персонажа
@@ -16,8 +40,6 @@ function loadImage() {
     window.requestAnimationFrame(drawhero);
   };
 };
-///
-
 ///
 
 ///константы
@@ -65,13 +87,14 @@ function Pfield(){
 			});
 		}
 	}
+  loadImage_tree();
+   loadImage_stone();
 }
 ///
 
 ///функция отрисовки игры
 function Game(){
 	Pfield();
-	context.clearRect(0,0,canvas.width,canvas.height);
 	for(let i = 0; i < map.length; i++){
 		context.strokeRect(
 			map[i].x,
@@ -80,8 +103,7 @@ function Game(){
 			cell.height
 			)
 			drawhero(herosprite);
-	        requestAnimationFrame(drawhero);
-	        spawnObject();	
+	    requestAnimationFrame(drawhero);
 	}
 }
 ///
@@ -101,29 +123,28 @@ loadImage();
 //получение пользовательского ввода
 window.addEventListener('keydown', keyDownListener, false);
 function keyDownListener(event) {
-  keyPresses[event.key] = true;
+  keyPresses[event.code] = true;
 }
 window.addEventListener('keyup', keyUpListener, false);
 function keyUpListener(event) {
-  keyPresses[event.key] = false;
+  keyPresses[event.code] = false;
 }
 //
 
 //функция перемещение персонажа с отрисовкой нужного спрайта
 function drawhero() {
-	 context.clearRect(0, 0, canvas.width, canvas.height);
   let hasMoved = false;
-  if (keyPresses.w) {
+  if (keyPresses.KeyW) {
     moveCharacter(0, -MOVEMENT_SPEED, FACING_UP);
     hasMoved = true;
-  } else if (keyPresses.s) {
+  } else if (keyPresses.KeyS) {
     moveCharacter(0, MOVEMENT_SPEED, FACING_DOWN);
     hasMoved = true;
   }
-  if (keyPresses.a) {
+  if (keyPresses.KeyA) {
     moveCharacter(-MOVEMENT_SPEED, 0, FACING_LEFT);
     hasMoved = true;
-  } else if (keyPresses.d) {
+  } else if (keyPresses.KeyD) {
     moveCharacter(MOVEMENT_SPEED, 0, FACING_RIGHT);
     hasMoved = true;
   }
@@ -153,12 +174,9 @@ function drawhero() {
   }
   currentDirection = direction;
 }
+
 //
 
-///спавн игровых обьектов
-function spawnObject(){
-	
-}
 ///таймер
 
 ///
